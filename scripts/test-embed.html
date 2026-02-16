@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Widget - Test Embed</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #1f2937; }
+    p { color: #4b5563; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>AI Engagement Widget - Test Page</h1>
+  <p>This page tests the widget embed. The chat bubble should appear in the bottom-right corner.</p>
+  <p>For local testing, run <code>npm run dev</code> and open this file, or serve it from the same origin as the API.</p>
+  <p><strong>Note:</strong> Update the script src and data-api-url to match your deployment URL.</p>
+
+  <script
+    src="http://localhost:3000/widget.js"
+    data-api-url="http://localhost:3000/api"
+    async
+  ></script>
+</body>
+</html>
