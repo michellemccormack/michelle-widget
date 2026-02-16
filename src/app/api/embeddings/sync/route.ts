@@ -67,7 +67,11 @@ export async function POST(request: NextRequest) {
       total: faqs.length,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Embeddings sync error', error);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Something went wrong', details: process.env.NODE_ENV === 'development' ? message : undefined },
+      { status: 500 }
+    );
   }
 }

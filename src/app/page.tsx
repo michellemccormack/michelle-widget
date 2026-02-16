@@ -1,40 +1,9 @@
-'use client';
-
 /**
  * Demo page - shows the widget in action.
- * The widget is loaded via the embed script.
+ * Widget is rendered via WidgetWrapper in layout.
  */
 
-import { useEffect, useState } from 'react';
-
 export default function DemoPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      (window as { __AI_WIDGET_API_URL__?: string }).__AI_WIDGET_API_URL__ =
-        window.location.origin + '/api';
-
-      const root = document.getElementById('ai-engagement-widget-root');
-      if (!root) {
-        const div = document.createElement('div');
-        div.id = 'ai-engagement-widget-root';
-        document.body.appendChild(div);
-      }
-
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/widget-bundle.css';
-      document.head.appendChild(link);
-
-      const script = document.createElement('script');
-      script.src = '/widget-bundle.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   return (
     <main className="min-h-screen p-8 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-4">
