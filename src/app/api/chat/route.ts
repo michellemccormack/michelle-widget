@@ -1,7 +1,7 @@
 /**
- * POST question, get answer via semantic search or LLM fallback.
- * Primary: embeddings + cosine similarity (threshold 0.75).
- * Fallback: GPT-4o-mini for safe response when no match.
+ * POST question, get answer via semantic search.
+ * Primary: embeddings + cosine similarity (threshold 0.60).
+ * Fallback: generateFallbackResponse (GPT-4o-mini with full campaign knowledge).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,7 +9,6 @@ import { getFAQs, getConfig, updateFAQ, createLog } from '@/lib/airtable';
 import { generateEmbedding, generateFallbackResponse } from '@/lib/openai';
 import { findMostSimilar } from '@/lib/embeddings';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { cacheUtils, CACHE_KEYS } from '@/lib/redis';
 import { chatRequestSchema } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import type { ChatResponse } from '@/types/api';
@@ -17,7 +16,7 @@ import type { ChatResponse } from '@/types/api';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const SIMILARITY_THRESHOLD = 0.75;
+const SIMILARITY_THRESHOLD = 0.60;
 
 async function logAnswerServed(
   sessionId: string,
@@ -66,7 +65,6 @@ export async function POST(request: NextRequest) {
         logger.error('updateFAQ failed', e)
       );
 
-      const ctaAction = faq.cta_url ? 'external_link' : 'lead_capture';
       const response: ChatResponse = {
         answer: faq.short_answer,
         category: faq.category,
@@ -90,16 +88,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response);
     }
 
-    const fallbackAnswer = await generateFallbackResponse(
+    // No FAQ match - use AI fallback with full campaign knowledge
+    const fallbackMessage =
+      config.fallback_message || "I'm not sure about that. Would you like to get involved with the campaign?";
+
+    const answer = await generateFallbackResponse(
       validated.message,
-      config.fallback_message || "I'm not sure about that. Would you like to speak with someone?",
-      config.contact_cta_label || 'Contact Us'
+      fallbackMessage,
+      config.contact_cta_label || 'Get Involved'
     );
 
     const response: ChatResponse = {
-      answer: fallbackAnswer,
+      answer,
       cta: {
-        label: config.contact_cta_label || 'Contact Us',
+        label: config.contact_cta_label || 'Get Involved',
         url: config.contact_cta_url,
         action: config.contact_cta_url ? 'external_link' : 'lead_capture',
       },

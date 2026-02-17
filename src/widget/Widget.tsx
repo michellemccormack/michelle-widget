@@ -22,11 +22,45 @@ export default function Widget() {
     logEvent,
   } = useWidget();
 
+  // Map every category button to an actual FAQ question
+  const handleQuickButton = useCallback(
+    (category: string) => {
+      const categoryQuestions: Record<string, string> = {
+        // Core categories
+        'About': 'Who is Brian Shortsleeve?',
+        'Platform': "What is Brian's plan for Massachusetts?",
+        'Get Involved': 'How can I volunteer for the campaign?',
+        'Support': 'How do I donate to the campaign?',
+        'Record': 'What did Brian accomplish at the MBTA?',
+        'Voter Info': 'How can I register to vote?',
+        voting: 'How can I register to vote?',
+        'Events': 'Where can I meet Brian?',
+        'Issues': "What's wrong with Maura Healey's leadership?",
+        // Specific policy categories
+        'Tax Policy': "What is Brian's tax policy?",
+        'Business Policy': "What is Brian's position on small business and the economy?",
+        'Immigration Policy': "What is Brian's stance on immigration?",
+        'Education Policy': "What is Brian's education policy?",
+        'Public Safety': "What is Brian's public safety and crime policy?",
+        'Housing Policy': "What is Brian's housing and affordability policy?",
+        'Transportation': "What is Brian's transportation and MBTA policy?",
+        'Energy Policy': "What is Brian's energy policy?",
+        // Legacy fallback
+        'Policy': "What is Brian's tax policy?",
+      };
+
+      logEvent('button_click', { category }).catch(() => {});
+      const question = categoryQuestions[category] || `Tell me about ${category}`;
+      askQuestion(question, category);
+    },
+    [askQuestion, logEvent]
+  );
+
   const handleCtaClick = useCallback(
     (cta?: Message['cta']) => {
       if (!cta) return;
       if (cta.action === 'lead_capture') {
-        openLeadForm({ ...cta, source_question_id: cta.source_question_id, source_category: cta.source_category });
+        openLeadForm(cta);
       } else if (cta.action === 'external_link' && cta.url) {
         window.open(cta.url, '_blank', 'noopener,noreferrer');
         logEvent('cta_clicked', { label: cta.label, url: cta.url }).catch(() => {});
@@ -63,7 +97,7 @@ export default function Widget() {
             showLeadForm={showLeadForm}
             leadFormCta={leadFormCta}
             onAskQuestion={askQuestion}
-            onQuickButtonClick={(cat, label) => logEvent('button_click', { category: cat, label })}
+            onQuickButtonClick={handleQuickButton}
             onCtaClick={handleCtaClick}
             onSubmitLead={submitLead}
             onCloseLeadForm={closeLeadForm}

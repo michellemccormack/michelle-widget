@@ -74,6 +74,7 @@ export function useConfig() {
           data.fallback_message || "I'm not sure about that. Would you like to speak with someone?",
         contact_cta_label: data.contact_cta_label || 'Contact Us',
         contact_cta_url: data.contact_cta_url,
+        require_email_to_chat: data.require_email_to_chat === true,
       };
       setCachedConfig(widgetConfig);
       setConfig(widgetConfig);
@@ -85,6 +86,7 @@ export function useConfig() {
         quick_buttons: [],
         fallback_message: "I'm not sure about that. Would you like to speak with someone?",
         contact_cta_label: 'Contact Us',
+        require_email_to_chat: false,
       });
     } finally {
       setLoading(false);

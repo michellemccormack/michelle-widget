@@ -58,6 +58,10 @@ Complete guide to setting up Airtable as your CMS for the AI Engagement Widget.
 | key | value |
 |-----|-------|
 | `theme` | `{"primary_color": "#2563eb"}` |
+| `web_search_enabled` | `true` - When no FAQ match, search the web for answers. Requires `SERPER_API_KEY` in env. |
+| `require_email_to_chat` | `true` - Require email before user can chat. Collects leads upfront. |
+
+**Policy quick buttons:** Add FAQs with categories like `Tax Policy`, `Healthcare`, `Education`, `Public Safety`, `Housing` to get specific policy bubbles. Increase `quick_buttons_limit` (e.g. to 9) to show more.
 
 ### Table 3: Leads
 

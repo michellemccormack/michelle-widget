@@ -14,10 +14,30 @@ function getApiUrl(): string {
   return window.location.origin + '/api';
 }
 
+const EMAIL_GATE_STORAGE_KEY = 'ai_widget_email_gate_passed';
+
+function hasPassedEmailGate(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return sessionStorage.getItem(EMAIL_GATE_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function setEmailGatePassed(): void {
+  try {
+    sessionStorage.setItem(EMAIL_GATE_STORAGE_KEY, 'true');
+  } catch {
+    // ignore
+  }
+}
+
 export function useWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId] = useState(() => nanoid());
   const [hasSubmittedLead, setHasSubmittedLead] = useState(false);
+  const [hasPassedEmailGateState, setHasPassedEmailGateState] = useState(hasPassedEmailGate);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [leadFormCta, setLeadFormCta] = useState<Message['cta']>();
   const sessionStartRef = useRef(Date.now());
@@ -112,6 +132,34 @@ export function useWidget() {
     [apiUrl, sessionId, logEvent]
   );
 
+  const handleQuickButton = useCallback(
+    (category: string) => {
+      // Map quick button categories to actual FAQ questions
+      const categoryQuestions: Record<string, string> = {
+        About: 'Who is Brian Shortsleeve?',
+        Platform: "What is Brian's plan for Massachusetts?",
+        'Get Involved': 'How can I volunteer for the campaign?',
+        Support: 'How do I donate to the campaign?',
+        Record: 'What did Brian accomplish at the MBTA?',
+        // Specific policy bubbles (add FAQs with these categories in Airtable)
+        'Tax Policy': "What is Brian's stance on taxes?",
+        Healthcare: "What is Brian's healthcare policy?",
+        Education: "What is Brian's education policy?",
+        'Public Safety': "What is Brian's stance on public safety and crime?",
+        'Housing': "What is Brian's housing policy?",
+        'Immigration': "What is Brian's stance on immigration?",
+        Policy: "What is Brian's stance on taxes?", // fallback if old "Policy" category exists
+        'Voter Info': 'How can I register to vote?',
+        Events: 'Where can I meet Brian?',
+        Issues: "What's wrong with Maura Healey's leadership?",
+      };
+
+      const question = categoryQuestions[category] || `Tell me about ${category}`;
+      askQuestion(question, category);
+    },
+    [askQuestion]
+  );
+
   const submitLead = useCallback(
     async (email: string, zip?: string, name?: string, sourceCategory?: string, sourceQuestionId?: string) => {
       try {
@@ -149,6 +197,18 @@ export function useWidget() {
     setLeadFormCta(undefined);
   }, []);
 
+  const submitEmailGate = useCallback(
+    async (email: string) => {
+      const success = await submitLead(email, undefined, undefined, 'email_gate', undefined);
+      if (success) {
+        setEmailGatePassed();
+        setHasPassedEmailGateState(true);
+      }
+      return success;
+    },
+    [submitLead]
+  );
+
   const getSessionDuration = useCallback(() => {
     return Math.floor((Date.now() - sessionStartRef.current) / 1000);
   }, []);
@@ -161,10 +221,13 @@ export function useWidget() {
     messages,
     sessionId,
     hasSubmittedLead,
+    hasPassedEmailGate: hasPassedEmailGateState,
     showLeadForm,
     leadFormCta,
     askQuestion,
+    handleQuickButton,
     submitLead,
+    submitEmailGate,
     openLeadForm,
     closeLeadForm,
     logEvent,

@@ -6,13 +6,14 @@ interface QuickButtonsProps {
   buttons: Array<{ label: string; category: string }>;
   onSelect: (category: string, label: string) => void;
   disabled?: boolean;
+  className?: string;
 }
 
-export default function QuickButtons({ buttons, onSelect, disabled }: QuickButtonsProps) {
+export default function QuickButtons({ buttons, onSelect, disabled, className }: QuickButtonsProps) {
   if (buttons.length === 0) return null;
 
   return (
-    <div className="ai-widget-quick-buttons">
+    <div className={`ai-widget-quick-buttons${className ? ` ${className}` : ''}`}>
       {buttons.map((btn) => (
         <button
           key={`${btn.category}-${btn.label}`}

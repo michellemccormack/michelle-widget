@@ -9,6 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "sync-embeddings": "tsx scripts/sync-embeddings.ts",
+    "update-faq-ctas": "tsx scripts/update-faq-ctas.ts",
+    "update-voter-faq": "tsx scripts/update-voter-faq.ts",
+    "deploy": "tsx scripts/deploy-vercel.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

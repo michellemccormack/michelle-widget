@@ -48,12 +48,19 @@ export const logger = {
     }
   },
 
-  error(message: string, error?: unknown): void {
+  error(message: string, error?: unknown, meta?: Record<string, unknown>): void {
     if (shouldLog('error')) {
-      const errMeta = error instanceof Error
-        ? { message: error.message, stack: error.stack }
-        : error;
-      console.error(formatMessage('error', message, errMeta));
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message,
+          error: err.message,
+          stack: err.stack,
+          ...meta,
+          timestamp: new Date().toISOString(),
+        })
+      );
     }
   },
 };

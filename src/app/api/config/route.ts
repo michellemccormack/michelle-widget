@@ -56,6 +56,8 @@ export async function GET(request: NextRequest) {
         config.fallback_message || "I'm not sure about that. Would you like to speak with someone?",
       contact_cta_label: config.contact_cta_label || 'Contact Us',
       contact_cta_url: config.contact_cta_url,
+      require_email_to_chat:
+        config.require_email_to_chat === 'true' || config.require_email_to_chat === '1',
     };
 
     await cacheUtils.set(CACHE_KEYS.config(), response, cacheUtils.TTL.CONFIG);

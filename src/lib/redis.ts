@@ -38,8 +38,8 @@ export const cacheUtils = {
     const client = getRedis();
     if (!client) return null;
     try {
-      const data = await client.get<T>(key);
-      return data;
+      const data = await client.get(key);
+      return data as T | null;
     } catch (error) {
       logger.error('Redis get failed', error);
       return null;

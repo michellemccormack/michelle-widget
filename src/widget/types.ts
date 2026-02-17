@@ -30,6 +30,7 @@ export interface WidgetConfig {
   fallback_message: string;
   contact_cta_label: string;
   contact_cta_url?: string;
+  require_email_to_chat?: boolean;
 }
 
 export interface WidgetState {
