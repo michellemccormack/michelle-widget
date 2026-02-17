@@ -178,7 +178,6 @@ export function useWidget() {
 
         if (!res.ok) throw new Error('Failed to submit');
         setHasSubmittedLead(true);
-        setShowLeadForm(false);
         return true;
       } catch {
         return false;

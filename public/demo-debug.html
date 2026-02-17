@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Debug</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+    .ok { color: #0f0; }
+    .fail { color: #f00; }
+    pre { background: #333; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Widget Load Debug</h1>
+  <div id="log"></div>
+
+  <script>
+    const log = (msg, ok) => {
+      const el = document.getElementById('log');
+      const span = document.createElement('div');
+      span.className = ok === undefined ? '' : (ok ? 'ok' : 'fail');
+      span.textContent = (ok === undefined ? '' : (ok ? '✓ ' : '✗ ')) + msg;
+      el.appendChild(span);
+    };
+
+    log('Starting checks...');
+
+    // 1. Load widget.js
+    const script = document.createElement('script');
+    script.src = 'https://ai-engagement-widget.vercel.app/widget.js';
+    script.setAttribute('data-api-url', 'https://ai-engagement-widget.vercel.app/api');
+    script.onload = () => {
+      log('widget.js loaded', true);
+      log('__AI_WIDGET_API_URL__ = ' + (window.__AI_WIDGET_API_URL__ || 'NOT SET'), !!window.__AI_WIDGET_API_URL__);
+      log('__AI_WIDGET_LOADED__ = ' + window.__AI_WIDGET_LOADED__, window.__AI_WIDGET_LOADED__);
+
+      // Check for root
+      setTimeout(() => {
+        const root = document.getElementById('ai-engagement-widget-root');
+        log('ai-engagement-widget-root exists: ' + !!root, !!root);
+        if (root) {
+          log('Root children: ' + root.children.length);
+          log('Root innerHTML length: ' + root.innerHTML.length);
+        }
+
+        // Check for bubble
+        const bubble = document.querySelector('.ai-widget-bubble');
+        log('.ai-widget-bubble exists: ' + !!bubble, !!bubble);
+      }, 3000);
+    };
+    script.onerror = () => log('widget.js FAILED to load', false);
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>

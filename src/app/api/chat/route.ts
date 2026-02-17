@@ -106,12 +106,12 @@ export async function POST(request: NextRequest) {
         action: config.contact_cta_url ? 'external_link' : 'lead_capture',
       },
       confidence: 0,
-      source: 'llm_fallback',
+      source: 'no_match',
     };
 
     logAnswerServed(
       validated.session_id,
-      { source: 'llm_fallback' },
+      { source: 'no_match' },
       request.headers.get('user-agent') || undefined,
       request.headers.get('referrer') || undefined
     ).catch(() => {});

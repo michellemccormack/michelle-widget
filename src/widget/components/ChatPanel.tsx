@@ -200,12 +200,12 @@ export default function ChatPanel({
       {showLeadForm && (
         <div className="ai-widget-lead-form">
           {leadSuccess ? (
-            <div className="ai-widget-lead-success" style={{ color: primaryColor }}>
-              ✓ Thanks! We'll be in touch.
+            <div className="ai-widget-lead-success">
+              Thanks! We'll be in touch soon.
             </div>
           ) : (
             <form onSubmit={handleLeadSubmit}>
-              <p className="ai-widget-lead-title">Stay updated on the campaign</p>
+              <p className="ai-widget-lead-title">Stay updated on Brian's campaign</p>
               <input
                 type="text"
                 value={leadName}
@@ -243,7 +243,7 @@ export default function ChatPanel({
                   className="ai-widget-btn-submit"
                   style={{ backgroundColor: primaryColor }}
                 >
-                  {leadSubmitting ? 'Submitting...' : 'Join the Campaign'}
+                  {leadSubmitting ? 'Submitting...' : 'Stay Updated'}
                 </button>
               </div>
             </form>

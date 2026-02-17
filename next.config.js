@@ -12,12 +12,11 @@ const nextConfig = {
     },
   ],
   async rewrites() {
-    return [
-      {
-        source: '/widget.js',
-        destination: '/api/widget-bundle',
-      },
-    ];
+    return {
+      beforeFiles: [
+        { source: '/widget.js', destination: '/api/widget-bundle' },
+      ],
+    };
   },
 };
 
