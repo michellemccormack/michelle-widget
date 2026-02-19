@@ -1,13 +1,13 @@
 /**
  * Config loading + caching.
- * Fetches from API, caches in localStorage (10 min TTL).
+ * Fetches from API, caches in localStorage (2 min TTL).
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import type { WidgetConfig } from '../types';
 
 const CONFIG_CACHE_KEY = 'ai_widget_config';
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 2 * 60 * 1000;
 
 function getApiUrl(): string {
   if (typeof window === 'undefined') return '';

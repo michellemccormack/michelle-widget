@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
 
     const cached = await cacheUtils.get<object>(CACHE_KEYS.config());
     if (cached && typeof cached === 'object' && 'brand_name' in cached) {
-      return NextResponse.json(cached);
+      return NextResponse.json(cached, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+      });
     }
 
     const [config, faqs] = await Promise.all([getConfig(), getFAQs()]);
@@ -79,7 +81,9 @@ export async function GET(request: NextRequest) {
 
     await cacheUtils.set(CACHE_KEYS.config(), response, cacheUtils.TTL.CONFIG);
 
-    return NextResponse.json(response);
+    return NextResponse.json(response, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+    });
   } catch (error) {
     logger.error('Config endpoint error', error);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
