@@ -1,9 +1,6 @@
 /**
  * Import Michelle Config and FAQ data into the Michelle Widget Airtable base.
- * ONLY runs against base appGlpvmKt4d6VdzE (Michelle Widget).
- *
  * Before running: Add category options to FAQ table in Airtable (see IMPORT_INSTRUCTIONS.md)
- *
  * Usage: npx tsx scripts/import-michelle-data.ts
  */
 
@@ -13,11 +10,9 @@ config({ path: '.env.local' });
 import * as fs from 'fs';
 import * as path from 'path';
 import Airtable from 'airtable';
+import { MICHELLE_BASE_ID } from './airtable-base';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
 const apiKey = process.env.AIRTABLE_API_KEY;
-
-const MICHELLE_BASE_ID = 'appGlpvmKt4d6VdzE';
 const CSV_DIR = '/Users/michellem/Desktop/files';
 
 // Only these 6 categories - map all others to the closest match
@@ -51,31 +46,12 @@ const SKIP_QUESTIONS = new Set([
   'How does the AI know about my candidate?',
 ]);
 
-// Replace Brian references with generic portfolio language
-function cleanPortfolioText(text: string): string {
-  return text
-    .replace(/Brian Shortsleeve for MA Governor/g, 'a current campaign')
-    .replace(/Brian Shortsleeve's Massachusetts Governor campaign/g, 'a live campaign')
-    .replace(/Brian Shortsleeve/g, 'the client')
-    .replace(/his MBTA record/g, 'their record')
-    .replace(/his tax policy|his background|his campaign/gi, 'their policies and background')
-    .replace(/does Brian have a family\?/gi, 'personal details');
-}
-
-if (!baseId || !apiKey) {
-  console.error('AIRTABLE_BASE_ID and AIRTABLE_API_KEY required in .env.local');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 
-if (baseId !== MICHELLE_BASE_ID) {
-  console.error(`\n⚠️  SAFETY CHECK FAILED\n`);
-  console.error(`Your .env.local has AIRTABLE_BASE_ID=${baseId}`);
-  console.error(`This script ONLY imports to Michelle Widget base: ${MICHELLE_BASE_ID}`);
-  console.error(`\nUpdate .env.local with the correct base ID before running.\n`);
-  process.exit(1);
-}
-
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];
@@ -196,8 +172,8 @@ async function main() {
   for (const row of allFAQs) {
     try {
       const category = CATEGORY_MAP[row.category] || 'Features';
-      const shortAnswer = cleanPortfolioText(row.short_answer);
-      const longAnswer = row.long_answer ? cleanPortfolioText(row.long_answer) : undefined;
+      const shortAnswer = row.short_answer;
+      const longAnswer = row.long_answer;
       const fields: Record<string, unknown> = {
         question: row.question,
         category,

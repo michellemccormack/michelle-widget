@@ -49,7 +49,7 @@ Edit `.env.local` with your credentials:
 ```bash
 # Airtable
 AIRTABLE_API_KEY=your_airtable_api_key
-AIRTABLE_BASE_ID=your_base_id
+# AIRTABLE_BASE_ID not used - Michelle base is hardcoded
 
 # Upstash Redis
 UPSTASH_REDIS_REST_URL=your_redis_url

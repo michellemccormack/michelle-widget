@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getFAQs, getConfig } from '@/lib/airtable';
+import { getFAQs } from '@/lib/airtable';
 import { generateEmbeddings } from '@/lib/openai';
 import { cacheUtils, CACHE_KEYS } from '@/lib/redis';
 import { logger } from '@/lib/logger';
@@ -13,12 +13,12 @@ import Airtable from 'airtable';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
+const MICHELLE_BASE_ID = 'appGlpvmKt4d6VdzE';
 const apiKey = process.env.AIRTABLE_API_KEY;
 
 function getBase() {
-  if (!baseId || !apiKey) throw new Error('Airtable not configured');
-  return new Airtable({ apiKey }).base(baseId);
+  if (!apiKey) throw new Error('AIRTABLE_API_KEY not configured');
+  return new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 }
 
 export async function POST(request: NextRequest) {

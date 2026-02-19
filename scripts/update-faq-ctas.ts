@@ -1,6 +1,7 @@
 /**
  * Update FAQ CTA labels and URLs from CSV.
  * Usage: npx tsx scripts/update-faq-ctas.ts
+ * CSV path: FAQ_CTA_Updates.csv in project root (or set CSV_PATH env var)
  */
 
 import { config } from 'dotenv';
@@ -9,23 +10,18 @@ config({ path: '.env.local' });
 import * as fs from 'fs';
 import * as path from 'path';
 import Airtable from 'airtable';
+import { MICHELLE_BASE_ID } from './airtable-base';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
 const apiKey = process.env.AIRTABLE_API_KEY;
 
-if (!baseId || !apiKey) {
-  console.error('AIRTABLE_BASE_ID and AIRTABLE_API_KEY required in .env.local');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 
-const CSV_PATH = path.join(
-  process.cwd(),
-  '..',
-  '..',
-  'Shortsleeve_CTA_Updates.csv'
-);
+const CSV_PATH = process.env.CSV_PATH || path.join(process.cwd(), 'FAQ_CTA_Updates.csv');
 
 function parseCSV(content: string): { question: string; cta_label: string; cta_url: string }[] {
   const lines = content.trim().split('\n');

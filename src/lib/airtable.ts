@@ -1,6 +1,7 @@
 /**
  * Airtable client wrapper.
  * Only serve records with status=LIVE.
+ * This project uses Michelle McCormack's Airtable base only.
  */
 
 import Airtable from 'airtable';
@@ -8,14 +9,15 @@ import type { AirtableFAQ, AirtableConfig, AirtableLead, AirtableLog } from '@/t
 import { cacheUtils, CACHE_KEYS } from './redis';
 import { logger } from './logger';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
+/** Michelle Widget Airtable base - this project does not use any other base */
+const MICHELLE_BASE_ID = 'appGlpvmKt4d6VdzE';
 const apiKey = process.env.AIRTABLE_API_KEY;
 
 function getBase() {
-  if (!baseId || !apiKey) {
-    throw new Error('Airtable credentials not configured');
+  if (!apiKey) {
+    throw new Error('AIRTABLE_API_KEY not configured');
   }
-  return new Airtable({ apiKey }).base(baseId);
+  return new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 }
 
 export interface FAQRecord {

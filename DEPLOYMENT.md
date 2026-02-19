@@ -50,7 +50,7 @@ In Vercel dashboard, add these environment variables:
 ```bash
 # Airtable
 AIRTABLE_API_KEY=keyXXXXXXXXXXXXXX
-AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
+# AIRTABLE_BASE_ID not needed - Michelle base appGlpvmKt4d6VdzE is hardcoded
 
 # Upstash Redis
 UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
@@ -169,7 +169,6 @@ After custom domain is active:
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
 | `AIRTABLE_API_KEY` | ✅ | Airtable API key | `keyXXXXXXXX` |
-| `AIRTABLE_BASE_ID` | ✅ | Airtable base ID | `appXXXXXXXX` |
 | `UPSTASH_REDIS_REST_URL` | ✅ | Redis URL | `https://xxx.upstash.io` |
 | `UPSTASH_REDIS_REST_TOKEN` | ✅ | Redis token | `AXXXXXXX` |
 | `OPENAI_API_KEY` | ✅ | OpenAI API key | `sk-XXXXXXX` |

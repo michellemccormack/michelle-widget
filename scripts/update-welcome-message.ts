@@ -9,15 +9,16 @@ config({ path: '.env.local' });
 import Airtable from 'airtable';
 import { cacheUtils, CACHE_KEYS } from '../src/lib/redis';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
+import { MICHELLE_BASE_ID } from './airtable-base';
+
 const apiKey = process.env.AIRTABLE_API_KEY;
 
-if (!baseId || !apiKey) {
-  console.error('AIRTABLE_BASE_ID and AIRTABLE_API_KEY required in .env.local');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 
 const NEW_WELCOME_MESSAGE =
   "Hi! I'm here to help you learn about Michelle and the AI Agent Assistant she built. How can I help?";

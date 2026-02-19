@@ -8,16 +8,16 @@ config({ path: '.env.local' });
 
 import Airtable from 'airtable';
 import { cacheUtils, CACHE_KEYS } from '../src/lib/redis';
+import { MICHELLE_BASE_ID } from './airtable-base';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
 const apiKey = process.env.AIRTABLE_API_KEY;
 
-if (!baseId || !apiKey) {
-  console.error('AIRTABLE_BASE_ID and AIRTABLE_API_KEY required in .env.local');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 
 const NEW_SHORT_ANSWER =
   'Michelle McCormack is a media consultant with 20+ years shaping how brands and ideas show up publicly. Based in New York and Boston, she works across culture, brands, and politics.';

@@ -231,7 +231,7 @@ Add credentials to `.env.local`:
 
 ```bash
 AIRTABLE_API_KEY=keyXXXXXXXXXXXXXX
-AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
+# AIRTABLE_BASE_ID not used - Michelle base appGlpvmKt4d6VdzE is hardcoded in code
 ```
 
 ## 10. Generate Embeddings

@@ -11,12 +11,13 @@ import Airtable from 'airtable';
 import OpenAI from 'openai';
 import { cacheUtils, CACHE_KEYS } from '../src/lib/redis';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
+import { MICHELLE_BASE_ID } from './airtable-base';
+
 const apiKey = process.env.AIRTABLE_API_KEY;
 const openaiKey = process.env.OPENAI_API_KEY;
 
-if (!baseId || !apiKey) {
-  console.error('AIRTABLE_BASE_ID and AIRTABLE_API_KEY required in .env.local');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 if (!openaiKey) {
@@ -24,7 +25,7 @@ if (!openaiKey) {
   process.exit(1);
 }
 
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 const openai = new OpenAI({ apiKey: openaiKey });
 
 async function getFAQs() {

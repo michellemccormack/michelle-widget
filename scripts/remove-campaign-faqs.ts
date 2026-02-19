@@ -7,17 +7,16 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import Airtable from 'airtable';
+import { MICHELLE_BASE_ID } from './airtable-base';
 
-const baseId = process.env.AIRTABLE_BASE_ID;
 const apiKey = process.env.AIRTABLE_API_KEY;
-const MICHELLE_BASE_ID = 'appGlpvmKt4d6VdzE';
 
-if (!baseId || !apiKey || baseId !== MICHELLE_BASE_ID) {
-  console.error('AIRTABLE_BASE_ID must be Michelle Widget base (appGlpvmKt4d6VdzE)');
+if (!apiKey) {
+  console.error('AIRTABLE_API_KEY required in .env.local');
   process.exit(1);
 }
 
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey }).base(MICHELLE_BASE_ID);
 
 const TO_REMOVE = [
   'Can voters donate through the widget?',

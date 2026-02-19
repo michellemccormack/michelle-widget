@@ -1,7 +1,7 @@
 /**
  * POST question, get answer via semantic search.
  * Primary: embeddings + cosine similarity (threshold 0.60).
- * Fallback: generateFallbackResponse (GPT-4o-mini with full campaign knowledge).
+ * Fallback: generateFallbackResponse (GPT-4o-mini with Michelle context).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -246,23 +246,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response);
     }
 
-    // No FAQ match - use AI fallback with full campaign knowledge
+    // No FAQ match - use AI fallback with Michelle context
     const fallbackMessage =
-      config.fallback_message || "I'm not sure about that. Would you like to get involved with the campaign?";
+      config.fallback_message || "I'm not sure about that. Would you like to schedule a call to learn more?";
 
     const answer = await generateFallbackResponse(
       validated.message,
       fallbackMessage,
-      config.contact_cta_label || 'Get Involved'
+      config.contact_cta_label || 'Contact Us'
     );
 
-    const noMatchCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Get Involved', config.contact_cta_url);
+    const noMatchCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Contact Us', config.contact_cta_url);
     const ctas = ensureTwoCtas(noMatchCtas);
     const response: ChatResponse = {
       answer,
       ctas: ctas.length > 0 ? ctas : undefined,
       cta: ctas.length === 1 ? ctas[0] : {
-        label: config.contact_cta_label || 'Get Involved',
+        label: config.contact_cta_label || 'Contact Us',
         url: config.contact_cta_url,
         action: config.contact_cta_url ? 'external_link' : 'lead_capture',
       },
