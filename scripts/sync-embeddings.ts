@@ -9,6 +9,7 @@ config({ path: '.env.local' });
 
 import Airtable from 'airtable';
 import OpenAI from 'openai';
+import { cacheUtils, CACHE_KEYS } from '../src/lib/redis';
 
 const baseId = process.env.AIRTABLE_BASE_ID;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -64,6 +65,8 @@ async function main() {
 
   if (toProcess.length === 0) {
     console.log('All FAQs already have embeddings. Total:', faqs.length);
+    await cacheUtils.del(CACHE_KEYS.faqs());
+    console.log('Cleared FAQ cache.');
     return;
   }
 
@@ -88,7 +91,9 @@ async function main() {
     }
   }
 
+  await cacheUtils.del(CACHE_KEYS.faqs());
   console.log('Success! Updated', toProcess.length, 'FAQs. Total:', faqs.length);
+  console.log('Cleared FAQ cache.');
 }
 
 main().catch((err) => {

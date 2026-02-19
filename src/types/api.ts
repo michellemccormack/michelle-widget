@@ -11,11 +11,18 @@ export interface ChatResponse {
   answer: string;
   category?: string;
   faq_id?: string;
+  /** Single CTA (legacy). Use ctas when multiple. */
   cta?: {
     label: string;
     url?: string;
     action?: 'lead_capture' | 'external_link';
   };
+  /** Multiple CTAs. When present, overrides cta. */
+  ctas?: Array<{
+    label: string;
+    url?: string;
+    action?: 'lead_capture' | 'external_link';
+  }>;
   confidence: number;
   related_questions?: string[];
   source: 'faq_match' | 'web_search' | 'no_match';
@@ -29,6 +36,12 @@ export interface LeadRequest {
   source_category?: string;
   source_question_id?: string;
   tags?: string[];
+}
+
+export interface CtaItem {
+  label: string;
+  url?: string;
+  action?: 'lead_capture' | 'external_link';
 }
 
 export interface ConfigResponse {
@@ -45,6 +58,8 @@ export interface ConfigResponse {
   fallback_message: string;
   contact_cta_label: string;
   contact_cta_url?: string;
+  /** Multiple contact CTAs. When present, overrides contact_cta_label/url. */
+  contact_ctas?: CtaItem[];
 }
 
 export interface LogEvent {

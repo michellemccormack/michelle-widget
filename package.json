@@ -12,7 +12,8 @@
     "update-faq-ctas": "tsx scripts/update-faq-ctas.ts",
     "update-voter-faq": "tsx scripts/update-voter-faq.ts",
     "deploy": "tsx scripts/deploy-vercel.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "restart": "lsof -ti :3000 | xargs kill -9 2>/dev/null; npm run dev"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",

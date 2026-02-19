@@ -27,6 +27,8 @@ export interface FAQRecord {
   keywords?: string;
   cta_label?: string;
   cta_url?: string;
+  /** JSON array of {label, url} for multiple CTAs */
+  ctas?: string;
   status: 'LIVE' | 'DRAFT';
   priority?: number;
   embedding?: number[];
@@ -72,6 +74,7 @@ export async function getFAQs(): Promise<FAQRecord[]> {
           keywords: f.keywords,
           cta_label: f.cta_label,
           cta_url: f.cta_url,
+          ctas: f.ctas,
           status: (f.status as 'LIVE' | 'DRAFT') ?? 'DRAFT',
           priority: f.priority,
           embedding: parseEmbedding(f.embedding),

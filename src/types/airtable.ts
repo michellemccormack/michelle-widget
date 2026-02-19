@@ -8,6 +8,8 @@ export interface AirtableFAQ {
     keywords?: string;
     cta_label?: string;
     cta_url?: string;
+    /** JSON array of {label, url} for multiple CTAs. Overrides cta_label/url when present. */
+    ctas?: string;
     status: 'LIVE' | 'DRAFT';
     priority?: number;
     embedding?: number[];

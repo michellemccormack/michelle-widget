@@ -18,6 +18,90 @@ export const dynamic = 'force-dynamic';
 
 const SIMILARITY_THRESHOLD = 0.60;
 
+type CtaItem = { label: string; url?: string; action: 'lead_capture' | 'external_link' };
+
+const EMAIL_MICHELLE_CTA: CtaItem = {
+  label: 'Email Michelle',
+  url: 'mailto:michellemarion@gmail.com',
+  action: 'external_link',
+};
+
+/** Ensure we always have [primary, secondary] - primary from source, secondary always Email Michelle (unless primary is already that). */
+function ensureTwoCtas(primaryCtas: CtaItem[]): CtaItem[] {
+  const primary = primaryCtas[0] || { label: 'Contact', url: undefined, action: 'lead_capture' as const };
+  const isAlreadyEmail = primary.url === EMAIL_MICHELLE_CTA.url;
+  if (isAlreadyEmail) return [primary];
+  return [primary, EMAIL_MICHELLE_CTA];
+}
+
+function parseContactCtas(
+  contactCtas: string | Array<{ label: string; url?: string }> | undefined,
+  fallbackLabel: string,
+  fallbackUrl?: string
+): CtaItem[] {
+  if (contactCtas) {
+    let parsed: Array<{ label: string; url?: string }>;
+    if (typeof contactCtas === 'string') {
+      try {
+        parsed = JSON.parse(contactCtas) as Array<{ label: string; url?: string }>;
+      } catch {
+        parsed = [];
+      }
+    } else if (Array.isArray(contactCtas)) {
+      parsed = contactCtas;
+    } else {
+      parsed = [];
+    }
+    if (parsed.length > 0) {
+      return parsed.map((c): CtaItem => ({
+        label: c.label || 'Contact',
+        url: c.url,
+        action: c.url ? 'external_link' : 'lead_capture',
+      }));
+    }
+  }
+  if (fallbackLabel) {
+    return [
+      {
+        label: fallbackLabel,
+        url: fallbackUrl,
+        action: fallbackUrl ? 'external_link' : 'lead_capture',
+      },
+    ];
+  }
+  return [];
+}
+
+function buildFaqCtas(
+  faq: { cta_label?: string; cta_url?: string; ctas?: string },
+  defaultCtas: CtaItem[]
+): CtaItem[] {
+  if (faq.ctas) {
+    try {
+      const parsed = JSON.parse(faq.ctas) as Array<{ label: string; url?: string }>;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.map((c): CtaItem => ({
+        label: c.label || 'Learn More',
+        url: c.url,
+        action: c.url ? 'external_link' : 'lead_capture',
+      }));
+      }
+    } catch {
+      // fall through to single CTA
+    }
+  }
+  if (faq.cta_label) {
+    return [
+      {
+        label: faq.cta_label,
+        url: faq.cta_url,
+        action: faq.cta_url ? 'external_link' : 'lead_capture',
+      },
+    ];
+  }
+  return defaultCtas;
+}
+
 async function logAnswerServed(
   sessionId: string,
   payload: { faq_id?: string; confidence?: number; source: string },
@@ -51,6 +135,79 @@ export async function POST(request: NextRequest) {
 
     const [config, faqs] = await Promise.all([getConfig(), getFAQs()]);
 
+    const categoryFromQuickButton = validated.context?.previous_category;
+
+    // Quick button: return highest-priority FAQ in that category (category-based, not question search)
+    if (categoryFromQuickButton) {
+      const inCategory = faqs
+        .filter((f) => f.category === categoryFromQuickButton)
+        .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+      if (inCategory.length > 0) {
+        const faq = inCategory[0];
+        updateFAQ(faq.id, { view_count: (faq.view_count ?? 0) + 1 }).catch((e) =>
+          logger.error('updateFAQ failed', e)
+        );
+
+        const defaultContactCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Contact Us', config.contact_cta_url);
+        const faqCtas = buildFaqCtas(faq, defaultContactCtas);
+        const ctas = ensureTwoCtas(faqCtas);
+
+        const response: ChatResponse = {
+          answer: faq.short_answer,
+          category: faq.category,
+          faq_id: faq.id,
+          ctas: ctas.length > 0 ? ctas : undefined,
+          cta: ctas.length === 1 ? ctas[0] : undefined,
+          confidence: 1,
+          source: 'faq_match',
+        };
+
+        logAnswerServed(
+          validated.session_id,
+          { faq_id: faq.id, confidence: 1, source: 'faq_match' },
+          request.headers.get('user-agent') || undefined,
+          request.headers.get('referrer') || undefined
+        ).catch(() => {});
+
+        return NextResponse.json(response);
+      }
+    }
+
+    const query = validated.message.trim();
+    const queryLower = query.toLowerCase();
+
+    // Exact match - when question matches an FAQ exactly
+    const exactMatch = faqs.find((f) => f.question.trim().toLowerCase() === queryLower);
+    if (exactMatch) {
+      updateFAQ(exactMatch.id, { view_count: (exactMatch.view_count ?? 0) + 1 }).catch((e) =>
+        logger.error('updateFAQ failed', e)
+      );
+
+      const defaultContactCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Contact Us', config.contact_cta_url);
+      const faqCtas = buildFaqCtas(exactMatch, defaultContactCtas);
+      const ctas = ensureTwoCtas(faqCtas);
+
+      const response: ChatResponse = {
+        answer: exactMatch.short_answer,
+        category: exactMatch.category,
+        faq_id: exactMatch.id,
+        ctas: ctas.length > 0 ? ctas : undefined,
+        cta: ctas.length === 1 ? ctas[0] : ctas.length === 0 ? { label: config.contact_cta_label || 'Learn More', url: exactMatch.cta_url, action: exactMatch.cta_url ? 'external_link' : 'lead_capture' } : undefined,
+        confidence: 1,
+        source: 'faq_match',
+      };
+
+      logAnswerServed(
+        validated.session_id,
+        { faq_id: exactMatch.id, confidence: 1, source: 'faq_match' },
+        request.headers.get('user-agent') || undefined,
+        request.headers.get('referrer') || undefined
+      ).catch(() => {});
+
+      return NextResponse.json(response);
+    }
+
     const queryEmbedding = await generateEmbedding(validated.message);
 
     const faqsWithEmbedding = faqs
@@ -65,15 +222,16 @@ export async function POST(request: NextRequest) {
         logger.error('updateFAQ failed', e)
       );
 
+      const defaultContactCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Contact Us', config.contact_cta_url);
+      const faqCtas = buildFaqCtas(faq, defaultContactCtas);
+      const ctas = ensureTwoCtas(faqCtas);
+
       const response: ChatResponse = {
         answer: faq.short_answer,
         category: faq.category,
         faq_id: faq.id,
-        cta: {
-          label: faq.cta_label || config.contact_cta_label || 'Learn More',
-          url: faq.cta_url,
-          action: faq.cta_url ? 'external_link' : 'lead_capture',
-        },
+        ctas: ctas.length > 0 ? ctas : undefined,
+        cta: ctas.length === 1 ? ctas[0] : ctas.length === 0 ? { label: config.contact_cta_label || 'Learn More', url: faq.cta_url, action: faq.cta_url ? 'external_link' : 'lead_capture' } : undefined,
         confidence: similarity,
         source: 'faq_match',
       };
@@ -98,9 +256,12 @@ export async function POST(request: NextRequest) {
       config.contact_cta_label || 'Get Involved'
     );
 
+    const noMatchCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Get Involved', config.contact_cta_url);
+    const ctas = ensureTwoCtas(noMatchCtas);
     const response: ChatResponse = {
       answer,
-      cta: {
+      ctas: ctas.length > 0 ? ctas : undefined,
+      cta: ctas.length === 1 ? ctas[0] : {
         label: config.contact_cta_label || 'Get Involved',
         url: config.contact_cta_url,
         action: config.contact_cta_url ? 'external_link' : 'lead_capture',

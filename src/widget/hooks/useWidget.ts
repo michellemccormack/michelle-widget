@@ -97,19 +97,30 @@ export function useWidget() {
 
         const data = await res.json();
 
+        const ctas = data.ctas?.length
+          ? data.ctas.map((c: { label: string; url?: string; action?: string }) => ({
+              ...c,
+              source_question_id: data.faq_id,
+              source_category: data.category,
+            }))
+          : data.cta
+            ? [
+                {
+                  ...data.cta,
+                  source_question_id: data.faq_id,
+                  source_category: data.category,
+                },
+              ]
+            : undefined;
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingMsg.id
               ? {
                   ...m,
                   content: data.answer || 'Something went wrong. Please try again.',
-                  cta: data.cta
-                    ? {
-                        ...data.cta,
-                        source_question_id: data.faq_id,
-                        source_category: data.category,
-                      }
-                    : undefined,
+                  ctas: ctas?.length ? ctas : undefined,
+                  cta: ctas?.length === 1 ? ctas[0] : undefined,
                   isLoading: false,
                 }
               : m
@@ -136,22 +147,12 @@ export function useWidget() {
     (category: string) => {
       // Map quick button categories to actual FAQ questions
       const categoryQuestions: Record<string, string> = {
-        About: 'Who is Brian Shortsleeve?',
-        Platform: "What is Brian's plan for Massachusetts?",
-        'Get Involved': 'How can I volunteer for the campaign?',
-        Support: 'How do I donate to the campaign?',
-        Record: 'What did Brian accomplish at the MBTA?',
-        // Specific policy bubbles (add FAQs with these categories in Airtable)
-        'Tax Policy': "What is Brian's stance on taxes?",
-        Healthcare: "What is Brian's healthcare policy?",
-        Education: "What is Brian's education policy?",
-        'Public Safety': "What is Brian's stance on public safety and crime?",
-        'Housing': "What is Brian's housing policy?",
-        'Immigration': "What is Brian's stance on immigration?",
-        Policy: "What is Brian's stance on taxes?", // fallback if old "Policy" category exists
-        'Voter Info': 'How can I register to vote?',
-        Events: 'Where can I meet Brian?',
-        Issues: "What's wrong with Maura Healey's leadership?",
+        About: 'Tell me about About',
+        Services: 'Tell me about Services',
+        'AI Assistant': 'Tell me about AI Assistant',
+        Portfolio: 'Tell me about Portfolio',
+        Features: 'Tell me about Features',
+        Contact: 'Tell me about Contact',
       };
 
       const question = categoryQuestions[category] || `Tell me about ${category}`;

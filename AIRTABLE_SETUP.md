@@ -21,6 +21,7 @@ Complete guide to setting up Airtable as your CMS for the AI Engagement Widget.
 | `keywords` | Long text | - |
 | `cta_label` | Single line text | - |
 | `cta_url` | URL | - |
+| `ctas` | Long text | JSON array for multiple CTAs: `[{"label":"Schedule a Call","url":"..."},{"label":"Email","url":"mailto:..."}]` (optional) |
 | `status` | Single select | Options: LIVE, DRAFT |
 | `priority` | Number | Integer, 0-100 |
 | `embedding` | Long text | (Auto-filled) |
@@ -52,6 +53,7 @@ Complete guide to setting up Airtable as your CMS for the AI Engagement Widget.
 | `fallback_message` | I'm not sure about that. Would you like to speak with someone? |
 | `contact_cta_label` | Contact Us |
 | `contact_cta_url` | https://example.com/contact |
+| `contact_ctas` | `[{"label":"Schedule a Call","url":"https://calendly.com/..."},{"label":"Email","url":"mailto:..."}]` | JSON array for multiple CTAs (overrides single) |
 
 **Optional:**
 

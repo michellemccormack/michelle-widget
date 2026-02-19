@@ -3,18 +3,23 @@
  * Re-exports and extends shared types.
  */
 
+export interface MessageCta {
+  label: string;
+  url?: string;
+  action?: 'lead_capture' | 'external_link';
+  source_question_id?: string;
+  source_category?: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  cta?: {
-    label: string;
-    url?: string;
-    action?: 'lead_capture' | 'external_link';
-    source_question_id?: string;
-    source_category?: string;
-  };
+  /** Single CTA (legacy). Use ctas when multiple. */
+  cta?: MessageCta;
+  /** Multiple CTAs. When present, overrides cta. */
+  ctas?: MessageCta[];
   longAnswer?: string;
   isLoading?: boolean;
 }

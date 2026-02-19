@@ -47,6 +47,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    let contact_ctas: Array<{ label: string; url?: string; action?: 'lead_capture' | 'external_link' }> | undefined;
+    if (config.contact_ctas) {
+      try {
+        const parsed = JSON.parse(config.contact_ctas) as Array<{ label: string; url?: string }>;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          contact_ctas = parsed.map((c) => ({
+            label: c.label || 'Contact',
+            url: c.url,
+            action: c.url ? ('external_link' as const) : ('lead_capture' as const),
+          }));
+        }
+      } catch {
+        contact_ctas = undefined;
+      }
+    }
+
     const response = {
       brand_name: config.brand_name || 'Support',
       welcome_message: config.welcome_message || 'Hi! How can I help you today?',
@@ -56,6 +72,7 @@ export async function GET(request: NextRequest) {
         config.fallback_message || "I'm not sure about that. Would you like to speak with someone?",
       contact_cta_label: config.contact_cta_label || 'Contact Us',
       contact_cta_url: config.contact_cta_url,
+      contact_ctas,
       require_email_to_chat:
         config.require_email_to_chat === 'true' || config.require_email_to_chat === '1',
     };

@@ -20,10 +20,7 @@ interface ChatPanelProps {
 }
 
 const QUICK_CATEGORIES = [
-  'About', 'Platform', 'Tax Policy', 'Business Policy',
-  'Immigration Policy', 'Education Policy', 'Public Safety',
-  'Housing Policy', 'Transportation', 'Energy Policy',
-  'Get Involved', 'Support',
+  'About', 'Services', 'AI Assistant', 'Portfolio', 'Features', 'Contact',
 ];
 
 export default function ChatPanel({
@@ -109,7 +106,7 @@ export default function ChatPanel({
         <div className="ai-widget-header-content">
           <div className="ai-widget-header-text">
             <span className="ai-widget-brand">{config.brand_name}</span>
-            <span className="ai-widget-subtitle">Brian's Team</span>
+            <span className="ai-widget-subtitle">Michelle</span>
           </div>
           <div className="ai-widget-header-badge">
             <span className="ai-widget-online-dot" />
@@ -161,15 +158,20 @@ export default function ChatPanel({
               )}
             </div>
 
-            {/* CTA Button */}
-            {msg.cta && !msg.isLoading && (
-              <button
-                onClick={() => onCtaClick(msg.cta)}
-                className="ai-widget-cta-btn"
-                style={{ backgroundColor: primaryColor }}
-              >
-                {msg.cta.label}
-              </button>
+            {/* CTA Buttons */}
+            {!msg.isLoading && (msg.ctas?.length || msg.cta) && (
+              <div className="ai-widget-cta-group">
+                {(msg.ctas?.length ? msg.ctas : msg.cta ? [msg.cta] : []).map((cta, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onCtaClick(cta)}
+                    className={i === 0 ? 'ai-widget-cta-btn ai-widget-cta-btn-primary' : 'ai-widget-cta-btn ai-widget-cta-btn-secondary'}
+                    style={i === 0 ? { backgroundColor: primaryColor } : { borderColor: primaryColor, color: primaryColor }}
+                  >
+                    {cta.label}
+                  </button>
+                ))}
+              </div>
             )}
 
             {/* Persistent topic pills after the last completed bot answer */}
@@ -205,7 +207,7 @@ export default function ChatPanel({
             </div>
           ) : (
             <form onSubmit={handleLeadSubmit}>
-              <p className="ai-widget-lead-title">Stay updated on Brian's campaign</p>
+              <p className="ai-widget-lead-title">Stay updated</p>
               <input
                 type="text"
                 value={leadName}
