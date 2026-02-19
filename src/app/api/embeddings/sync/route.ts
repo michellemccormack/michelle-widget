@@ -35,11 +35,12 @@ export async function POST(request: NextRequest) {
     const toProcess = faqs.filter((f) => !f.embedding || f.embedding.length === 0);
 
     if (toProcess.length === 0) {
+      await cacheUtils.del(CACHE_KEYS.config());
       await cacheUtils.del(CACHE_KEYS.faqs());
       await cacheUtils.del(CACHE_KEYS.embeddings());
       return NextResponse.json({
         success: true,
-        message: 'All FAQs already have embeddings',
+        message: 'All FAQs already have embeddings. Cleared config, FAQ, and embeddings cache.',
         total: faqs.length,
       });
     }
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    await cacheUtils.del(CACHE_KEYS.config());
     await cacheUtils.del(CACHE_KEYS.faqs());
     await cacheUtils.del(CACHE_KEYS.embeddings());
 

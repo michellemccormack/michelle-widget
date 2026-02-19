@@ -59,10 +59,11 @@ function hasEmbedding(embedding: unknown): boolean {
 }
 
 async function main() {
-  console.log('Syncing embeddings...');
+  const force = process.argv.includes('--force');
+  console.log('Syncing embeddings...' + (force ? ' (force: regenerating all)' : ''));
 
   const faqs = await getFAQs();
-  const toProcess = faqs.filter((f) => !hasEmbedding(f.embedding));
+  const toProcess = force ? faqs : faqs.filter((f) => !hasEmbedding(f.embedding));
 
   if (toProcess.length === 0) {
     console.log('All FAQs already have embeddings. Total:', faqs.length);
