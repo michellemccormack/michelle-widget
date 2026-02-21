@@ -145,18 +145,7 @@ export function useWidget() {
 
   const handleQuickButton = useCallback(
     (category: string) => {
-      // Map quick button categories to actual FAQ questions
-      const categoryQuestions: Record<string, string> = {
-        About: 'Tell me about About',
-        Services: 'Tell me about Services',
-        'AI Assistant': 'Tell me about AI Assistant',
-        Portfolio: 'Tell me about Portfolio',
-        Features: 'Tell me about Features',
-        Contact: 'Tell me about Contact',
-      };
-
-      const question = categoryQuestions[category] || `Tell me about ${category}`;
-      askQuestion(question, category);
+      askQuestion(`Tell me about ${category}`, category);
     },
     [askQuestion]
   );

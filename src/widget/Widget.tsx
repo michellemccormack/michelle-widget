@@ -24,11 +24,10 @@ export default function Widget() {
 
   if (!ready) return null;
 
-  // Quick buttons trigger category-based lookup (highest-priority FAQ in that category)
   const handleQuickButton = useCallback(
     (category: string) => {
       logEvent('button_click', { category }).catch(() => {});
-      askQuestion(category, category);
+      askQuestion(`Tell me about ${category}`, category);
     },
     [askQuestion, logEvent]
   );
