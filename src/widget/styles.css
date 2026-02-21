@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 2147483647;
   padding: 0;
   animation: pulse 2.5s infinite;
 }
@@ -48,7 +48,7 @@
   position: fixed;
   bottom: 100px;
   right: 24px;
-  z-index: 9998;
+  z-index: 2147483646;
   animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
