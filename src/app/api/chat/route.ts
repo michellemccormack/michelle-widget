@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getFAQs, getConfig, updateFAQ, createLog } from '@/lib/airtable';
+import { getCorsHeaders } from '@/lib/cors';
 import { generateEmbedding, generateFallbackResponse } from '@/lib/openai';
 import { findMostSimilar } from '@/lib/embeddings';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -127,7 +128,10 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {
-      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+      return NextResponse.json({ error: 'Rate limit exceeded' }, {
+        status: 429,
+        headers: getCorsHeaders(request),
+      });
     }
 
     const body = await request.json();
@@ -170,7 +174,7 @@ export async function POST(request: NextRequest) {
           request.headers.get('referrer') || undefined
         ).catch(() => {});
 
-        return NextResponse.json(response);
+        return NextResponse.json(response, { headers: getCorsHeaders(request) });
       }
     }
 
@@ -205,7 +209,7 @@ export async function POST(request: NextRequest) {
         request.headers.get('referrer') || undefined
       ).catch(() => {});
 
-      return NextResponse.json(response);
+      return NextResponse.json(response, { headers: getCorsHeaders(request) });
     }
 
     const queryEmbedding = await generateEmbedding(validated.message);
@@ -243,7 +247,7 @@ export async function POST(request: NextRequest) {
         request.headers.get('referrer') || undefined
       ).catch(() => {});
 
-      return NextResponse.json(response);
+      return NextResponse.json(response, { headers: getCorsHeaders(request) });
     }
 
     // No FAQ match - use AI fallback with Michelle context
@@ -277,12 +281,25 @@ export async function POST(request: NextRequest) {
       request.headers.get('referrer') || undefined
     ).catch(() => {});
 
-    return NextResponse.json(response);
+    return NextResponse.json(response, { headers: getCorsHeaders(request) });
   } catch (error) {
     if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid request' }, {
+        status: 400,
+        headers: getCorsHeaders(request),
+      });
     }
     logger.error('Chat endpoint error', error);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, {
+      status: 500,
+      headers: getCorsHeaders(request),
+    });
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: getCorsHeaders(request),
+  });
 }

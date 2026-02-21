@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getConfig, getFAQs } from '@/lib/airtable';
+import { getCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { cacheUtils, CACHE_KEYS } from '@/lib/redis';
 import { logger } from '@/lib/logger';
@@ -17,13 +18,16 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {
-      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+      return NextResponse.json({ error: 'Rate limit exceeded' }, {
+        status: 429,
+        headers: getCorsHeaders(request),
+      });
     }
 
     const cached = await cacheUtils.get<object>(CACHE_KEYS.config());
     if (cached && typeof cached === 'object' && 'brand_name' in cached) {
       return NextResponse.json(cached, {
-        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+        headers: { ...getCorsHeaders(request), 'Cache-Control': 'no-store, no-cache, must-revalidate' },
       });
     }
 
@@ -82,10 +86,20 @@ export async function GET(request: NextRequest) {
     await cacheUtils.set(CACHE_KEYS.config(), response, cacheUtils.TTL.CONFIG);
 
     return NextResponse.json(response, {
-      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+      headers: { ...getCorsHeaders(request), 'Cache-Control': 'no-store, no-cache, must-revalidate' },
     });
   } catch (error) {
     logger.error('Config endpoint error', error);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, {
+      status: 500,
+      headers: getCorsHeaders(request),
+    });
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: getCorsHeaders(request),
+  });
 }
