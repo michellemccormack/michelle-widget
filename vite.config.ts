@@ -29,7 +29,10 @@ export default defineConfig({
     sourcemap: false,
   },
   define: {
+    __DEV__: false,
     'process.env.NODE_ENV': JSON.stringify('production'),
-    'import.meta.env.VITE_API_URL': JSON.stringify('https://michelle-widget.vercel.app/api'),
+    'process.env': '{}',
+    'process': JSON.stringify({}),
+    global: 'window',
   },
 });

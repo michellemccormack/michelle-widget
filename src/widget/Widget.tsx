@@ -22,7 +22,7 @@ export default function Widget() {
     logEvent,
   } = useWidget();
 
-  if (!ready) return null;
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleQuickButton = useCallback(
     (category: string) => {
@@ -45,7 +45,13 @@ export default function Widget() {
     [openLeadForm, logEvent]
   );
 
-  const [isOpen, setIsOpen] = useState(false);
+  const toggleOpen = useCallback(() => {
+    const next = !isOpen;
+    setIsOpen(next);
+    if (next) {
+      logEvent('widget_open').catch(() => {});
+    }
+  }, [isOpen, logEvent]);
 
   // Close panel when user clicks outside (on the main website)
   useEffect(() => {
@@ -61,13 +67,7 @@ export default function Widget() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const toggleOpen = useCallback(() => {
-    const next = !isOpen;
-    setIsOpen(next);
-    if (next) {
-      logEvent('widget_open').catch(() => {});
-    }
-  }, [isOpen, logEvent]);
+  if (!ready) return null;
 
   return (
     <div className="ai-widget-root">
