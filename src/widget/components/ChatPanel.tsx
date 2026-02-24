@@ -111,7 +111,6 @@ export default function ChatPanel({
         <div className="ai-widget-header-content">
           <div className="ai-widget-header-text">
             <span className="ai-widget-brand">{config.brand_name}</span>
-            <span className="ai-widget-subtitle-pill">Conversational AI</span>
           </div>
           <div className="ai-widget-header-badge">
             <span className="ai-widget-online-dot" />
@@ -291,7 +290,7 @@ export default function ChatPanel({
 
       {/* Footer */}
       <div className="ai-widget-footer">
-        Automated assistant · Responses may vary
+        Promptly
       </div>
     </div>
   );

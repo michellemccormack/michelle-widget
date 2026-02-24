@@ -26,7 +26,7 @@ git add .
 git commit -m "Initial commit: AI Engagement Widget"
 
 # Add remote
-git remote add origin https://github.com/yourusername/ai-engagement-widget.git
+git remote add origin https://github.com/yourusername/michelle-widget.git
 
 # Push
 git push -u origin main

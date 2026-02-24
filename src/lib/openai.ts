@@ -104,6 +104,43 @@ INSTRUCTIONS:
   }
 }
 
+export async function synthesizeAnswerFromFAQ(
+  question: string,
+  faqAnswer: string,
+  fallbackMessage: string
+): Promise<string> {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: FALLBACK_MODEL,
+      max_tokens: 300,
+      messages: [
+        {
+          role: 'system',
+          content: `You are Michelle McCormack's personal AI assistant. Your job is to answer questions naturally and conversationally using the provided FAQ answer as your source material.
+
+Rules:
+- ALWAYS write in first person (I, my, we) — never third person (she, her, they)
+- Michelle is speaking directly to the visitor
+- Keep answers concise and direct — 2-4 sentences maximum
+- Never start with filler phrases like "Great question!", "I understand", "Certainly!", or "Of course!"
+- Get straight to the answer
+- NEVER end your response with a question
+- If the FAQ answer doesn't directly address the question, use it as context to give the most helpful response possible`,
+        },
+        {
+          role: 'user',
+          content: `Question: ${question}\n\nFAQ Answer to use as source: ${faqAnswer}\n\nProvide a natural, conversational answer to the question using the FAQ answer as your source material.`,
+        },
+      ],
+    });
+
+    return completion.choices[0]?.message?.content?.trim() || fallbackMessage;
+  } catch (error) {
+    logger.error('synthesizeAnswerFromFAQ failed', error);
+    return fallbackMessage;
+  }
+}
+
 export async function synthesizeAnswerFromSearch(
   userQuestion: string,
   searchContext: string,

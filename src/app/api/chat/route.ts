@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFAQs, getConfig, updateFAQ, createLog } from '@/lib/airtable';
 import { getCorsHeaders } from '@/lib/cors';
-import { generateEmbedding, generateFallbackResponse } from '@/lib/openai';
+import { generateEmbedding, generateFallbackResponse, synthesizeAnswerFromFAQ } from '@/lib/openai';
 import { findMostSimilar } from '@/lib/embeddings';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { chatRequestSchema } from '@/lib/validation';
@@ -17,7 +17,8 @@ import type { ChatResponse } from '@/types/api';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const SIMILARITY_THRESHOLD = 0.60;
+const SIMILARITY_THRESHOLD = 0.50;
+const SYNTHESIS_THRESHOLD = 0.70;
 
 type CtaItem = { label: string; url?: string; action: 'lead_capture' | 'external_link' };
 
@@ -135,6 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log(`[Chat] Request received: "${(body as { message?: string }).message ?? '(no message)'}"`);
     const validated = chatRequestSchema.parse(body);
 
     const [config, faqs] = await Promise.all([getConfig(), getFAQs()]);
@@ -149,6 +151,7 @@ export async function POST(request: NextRequest) {
 
       if (inCategory.length > 0) {
         const faq = inCategory[0];
+        console.log(`FAQ match (quick button): "${faq.question}" | category: ${categoryFromQuickButton}`);
         updateFAQ(faq.id, { view_count: (faq.view_count ?? 0) + 1 }).catch((e) =>
           logger.error('updateFAQ failed', e)
         );
@@ -184,6 +187,7 @@ export async function POST(request: NextRequest) {
     // Exact match - when question matches an FAQ exactly
     const exactMatch = faqs.find((f) => f.question.trim().toLowerCase() === queryLower);
     if (exactMatch) {
+      console.log(`FAQ match (exact): "${exactMatch.question}" | similarity: 1`);
       updateFAQ(exactMatch.id, { view_count: (exactMatch.view_count ?? 0) + 1 }).catch((e) =>
         logger.error('updateFAQ failed', e)
       );
@@ -222,16 +226,26 @@ export async function POST(request: NextRequest) {
 
     if (match) {
       const { faq, similarity } = match;
+      console.log(`FAQ match (semantic): "${faq.question}" | similarity: ${similarity}`);
       updateFAQ(faq.id, { view_count: (faq.view_count ?? 0) + 1 }).catch((e) =>
         logger.error('updateFAQ failed', e)
       );
+
+      const shouldSynthesize = (faq as { force_synthesis?: boolean }).force_synthesis === true || similarity < SYNTHESIS_THRESHOLD;
+      const answer = shouldSynthesize
+        ? await synthesizeAnswerFromFAQ(
+            validated.message,
+            faq.short_answer,
+            config.fallback_message || "I'm not sure about that. Would you like to schedule a call?"
+          )
+        : faq.short_answer;
 
       const defaultContactCtas = parseContactCtas(config.contact_ctas, config.contact_cta_label || 'Contact Us', config.contact_cta_url);
       const faqCtas = buildFaqCtas(faq, defaultContactCtas);
       const ctas = ensureTwoCtas(faqCtas);
 
       const response: ChatResponse = {
-        answer: faq.short_answer,
+        answer,
         category: faq.category,
         faq_id: faq.id,
         ctas: ctas.length > 0 ? ctas : undefined,
@@ -251,6 +265,7 @@ export async function POST(request: NextRequest) {
     }
 
     // No FAQ match - use AI fallback with Michelle context
+    console.log(`FAQ: no match, using AI fallback | query: "${validated.message}"`);
     const fallbackMessage =
       config.fallback_message || "I'm not sure about that. Would you like to schedule a call to learn more?";
 

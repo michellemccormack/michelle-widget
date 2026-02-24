@@ -28,8 +28,8 @@
 
     // 1. Load widget.js
     const script = document.createElement('script');
-    script.src = 'https://ai-engagement-widget.vercel.app/widget.js';
-    script.setAttribute('data-api-url', 'https://ai-engagement-widget.vercel.app/api');
+    script.src = 'https://michelle-widget.vercel.app/widget.js';
+    script.setAttribute('data-api-url', 'https://michelle-widget.vercel.app/api');
     script.onload = () => {
       log('widget.js loaded', true);
       log('__AI_WIDGET_API_URL__ = ' + (window.__AI_WIDGET_API_URL__ || 'NOT SET'), !!window.__AI_WIDGET_API_URL__);
@@ -37,8 +37,8 @@
 
       // Check for root
       setTimeout(() => {
-        const root = document.getElementById('ai-engagement-widget-root');
-        log('ai-engagement-widget-root exists: ' + !!root, !!root);
+        const root = document.getElementById('michelle-widget-root');
+        log('michelle-widget-root exists: ' + !!root, !!root);
         if (root) {
           log('Root children: ' + root.children.length);
           log('Root innerHTML length: ' + root.innerHTML.length);

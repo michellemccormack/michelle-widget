@@ -6,7 +6,7 @@ This repository contains a complete AI Engagement Widget implementation.
 
 ```bash
 git clone <your-repo-url>
-cd ai-engagement-widget
+cd michelle-widget
 npm install
 ```
 

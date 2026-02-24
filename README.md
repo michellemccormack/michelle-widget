@@ -33,7 +33,7 @@ A reusable, embeddable AI-powered chat widget for lead generation and customer e
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd ai-engagement-widget
+cd michelle-widget
 
 # Install dependencies
 npm install
@@ -105,7 +105,7 @@ See `DEPLOYMENT.md` for detailed deployment instructions.
 ## 📂 Project Structure
 
 ```
-ai-engagement-widget/
+michelle-widget/
 ├── src/
 │   ├── app/
 │   │   └── api/          # API routes

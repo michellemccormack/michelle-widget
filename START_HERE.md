@@ -26,7 +26,7 @@ The complete codebase is too large to include in a single download, but you have
 
 2. **Open in Cursor AI**:
    ```bash
-   cursor /path/to/ai-engagement-widget
+   cursor /path/to/michelle-widget
    ```
 
 3. **Copy the implementation plan** (the original document I provided) into a file or keep it open
@@ -145,7 +145,7 @@ Follow `DEPLOYMENT.md` for complete deployment instructions.
 Your completed project should look like:
 
 ```
-ai-engagement-widget/
+michelle-widget/
 ├── package.json ✅ (Already created)
 ├── tsconfig.json ✅
 ├── .env.example ✅

@@ -10,7 +10,7 @@ import { createPortal } from 'react-dom';
 import Widget from './Widget';
 import './styles.css';
 
-const CONTAINER_ID = 'ai-engagement-widget-root';
+const CONTAINER_ID = 'michelle-widget-root';
 
 function App() {
   return createPortal(<Widget />, document.body);

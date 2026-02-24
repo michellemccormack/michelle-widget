@@ -23,10 +23,10 @@ const loaderScript = `
 
   var assetBase = apiUrl ? apiUrl.replace(/\\/api\\/?$/, '').replace(/\\/$/, '') : base;
 
-  var root = document.getElementById('ai-engagement-widget-root');
+  var root = document.getElementById('michelle-widget-root');
   if (!root) {
     root = document.createElement('div');
-    root.id = 'ai-engagement-widget-root';
+    root.id = 'michelle-widget-root';
     document.body.appendChild(root);
   }
 

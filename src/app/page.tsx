@@ -19,17 +19,23 @@ export default function DemoPage() {
         <h1
           className={`${tiltWarp.className} ${styles.heading}`}
         >
-          AI Agent Assistant
+          Promptly AI
         </h1>
+
+        <p className={styles.intro}>
+          People often get lost on websites looking for answers.
+          <br />
+          Promptly fixes that.
+        </p>
 
         <h2 className={styles.subheading}>
           What it does:
         </h2>
         <ul className={styles.list}>
           {[
-            'Answers questions 24/7',
-            'Captures emails and donations',
+            'Responds with natural language, 24/7',
             'Matches your voice and brand',
+            'Captures emails, donations, and leads',
           ].map((item) => (
             <li key={item} className={styles.listItem}>
               {item}
@@ -39,10 +45,10 @@ export default function DemoPage() {
 
         <div className={styles.instructionBox}>
           <p className={styles.instructionP}>
-            <strong>Try it now:</strong> Click the bubble in the corner. Ask about my work, services, the AI Campaign Assistant—anything.
+            <strong>Try it now:</strong> Click the bubble in the corner. Ask about my work, services, or how Promptly works.
           </p>
           <p className={styles.instructionP}>
-            Notice how it responds naturally, captures contact info when people are ready, and adapts to different questions? That&apos;s all automated. And I can customize every part—messaging, FAQs, branding—for your campaign in days.
+            Notice how it responds naturally, handles any question, and captures contact info at exactly the right moment? That&apos;s fully automated and I can build it for you in days.
           </p>
         </div>
       </div>

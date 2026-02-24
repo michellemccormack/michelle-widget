@@ -91,7 +91,7 @@ npm run type-check
 Your final structure should look like:
 
 ```
-ai-engagement-widget/
+michelle-widget/
 ├── package.json
 ├── tsconfig.json
 ├── next.config.js

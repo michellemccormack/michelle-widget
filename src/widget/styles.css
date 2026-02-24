@@ -60,7 +60,7 @@
 /* ---- Panel ---- */
 .ai-widget-panel {
   width: 380px;
-  max-height: 600px;
+  max-height: min(600px, calc(100vh - 124px));
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.1);
@@ -473,10 +473,10 @@
 
 /* ---- Footer ---- */
 .ai-widget-footer {
-  text-align: center;
-  font-size: 10.5px;
-  color: #d1d5db;
-  padding: 6px 0 8px;
+  text-align: right;
+  font-size: 9px;
+  color: #9ca3af;
+  padding: 6px 16px 8px;
   font-weight: 400;
   letter-spacing: 0.2px;
 }
@@ -485,7 +485,7 @@
 @media (max-width: 480px) {
   .ai-widget-panel {
     width: calc(100vw - 32px);
-    max-height: 70vh;
+    max-height: calc(100vh - 106px);
   }
   .ai-widget-panel-wrapper {
     right: 16px;
