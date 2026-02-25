@@ -144,8 +144,8 @@ export function useWidget() {
   );
 
   const handleQuickButton = useCallback(
-    (category: string) => {
-      askQuestion(`Tell me about ${category}`, category);
+    (category: string, question?: string) => {
+      askQuestion(question || `Tell me about ${category}`, category);
     },
     [askQuestion]
   );

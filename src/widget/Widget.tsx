@@ -25,9 +25,9 @@ export default function Widget() {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleQuickButton = useCallback(
-    (category: string) => {
+    (category: string, question?: string) => {
       logEvent('button_click', { category }).catch(() => {});
-      askQuestion(`Tell me about ${category}`, category);
+      askQuestion(question || `Tell me about ${category}`, category);
     },
     [askQuestion, logEvent]
   );

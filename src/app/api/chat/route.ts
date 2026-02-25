@@ -17,6 +17,61 @@ import type { ChatResponse } from '@/types/api';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const PROFANITY_TERMS = [
+  'fuck', 'fucking', 'fucked', 'fucker', 'fucks',
+  'shit', 'shitting', 'shitty',
+  'bitch', 'bitching', 'bitches',
+  'ass', 'asshole', 'asses',
+  'damn', 'damned',
+  'crap', 'crappy',
+  'piss', 'pissed',
+  'cock', 'cocks',
+  'dick', 'dicks',
+  'pussy', 'pussies',
+  'bastard', 'bastards',
+  'cunt', 'cunts',
+  'whore', 'whores',
+  'slut', 'sluts',
+];
+
+function isProfane(text: string): boolean {
+  const lower = text.toLowerCase();
+  return PROFANITY_TERMS.some(term => lower.includes(term));
+}
+
+const HOT_BUTTON_TERMS = [
+  // LGBTQ
+  'lgbtq', 'lgbt', 'gay', 'lesbian', 'bisexual', 'transgender', 'trans',
+  'queer', 'nonbinary', 'non-binary', 'gender identity', 'pronouns',
+  'same sex', 'same-sex', 'gay marriage', 'gay rights', 'pride',
+  // Trump
+  'trump', 'donald trump', 'maga', 'make america great',
+  // Sexual
+  'sex', 'sexual', 'sexually', 'intercourse', 'nude', 'naked',
+  'porn', 'pornography', 'explicit', 'erotic', 'fetish',
+];
+
+function isHotButton(text: string): boolean {
+  const lower = text.toLowerCase();
+  return HOT_BUTTON_TERMS.some(term => lower.includes(term));
+}
+
+const PERSONAL_TERMS = [
+  'mom', 'dad', 'mother', 'father', 'parents', 'parent',
+  'boyfriend', 'girlfriend', 'dating', 'relationship', 'single',
+  'married', 'partner', 'love life', 'romantic', 'romance',
+  'seeing someone', 'husband', 'wife', 'spouse',
+  'kids', 'children', 'child', 'baby', 'babies',
+  'siblings', 'brother', 'sister', 'family',
+  'age', 'how old', 'birthday', 'born',
+  'religion', 'church', 'faith', 'spiritual',
+];
+
+function isPersonalQuestion(text: string): boolean {
+  const lower = text.toLowerCase();
+  return PERSONAL_TERMS.some(term => lower.includes(term));
+}
+
 const SIMILARITY_THRESHOLD = 0.50;
 const SYNTHESIS_THRESHOLD = 0.70;
 
@@ -139,6 +194,35 @@ export async function POST(request: NextRequest) {
     console.log(`[Chat] Request received: "${(body as { message?: string }).message ?? '(no message)'}"`);
     const validated = chatRequestSchema.parse(body);
 
+    const query = validated.message.trim();
+
+    // Profanity filter
+    if (isProfane(query)) {
+      return NextResponse.json({
+        answer: "Let's keep it clean. Ask me something else.",
+        confidence: 0,
+        source: 'profanity_blocked',
+      }, { headers: getCorsHeaders(request) });
+    }
+
+    // Hot button filter
+    if (isHotButton(query)) {
+      return NextResponse.json({
+        answer: "That's a topic I'm not covering here, but I'd love to help with something else.",
+        confidence: 0,
+        source: 'hot_button_blocked',
+      }, { headers: getCorsHeaders(request) });
+    }
+
+    // Personal question filter
+    if (isPersonalQuestion(query)) {
+      return NextResponse.json({
+        answer: "Hey, that's personal. And though I appreciate the interest, I'm here just to talk about work.",
+        confidence: 0,
+        source: 'personal_blocked',
+      }, { headers: getCorsHeaders(request) });
+    }
+
     const [config, faqs] = await Promise.all([getConfig(), getFAQs()]);
 
     const categoryFromQuickButton = validated.context?.previous_category;
@@ -181,7 +265,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const query = validated.message.trim();
     const queryLower = query.toLowerCase();
 
     // Exact match - when question matches an FAQ exactly
@@ -232,6 +315,7 @@ export async function POST(request: NextRequest) {
       );
 
       const shouldSynthesize = (faq as { force_synthesis?: boolean }).force_synthesis === true || similarity < SYNTHESIS_THRESHOLD;
+      if (shouldSynthesize) console.log(`[Chat] Using synthesis (similarity ${similarity} < ${SYNTHESIS_THRESHOLD})`);
       const answer = shouldSynthesize
         ? await synthesizeAnswerFromFAQ(
             validated.message,

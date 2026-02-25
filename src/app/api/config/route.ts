@@ -1,8 +1,11 @@
 /**
  * GET widget config from Airtable.
  * Returns brand settings, welcome message, quick buttons, theme.
+ * Falls back to config.local.json when Airtable fails (timeout, 403, etc.).
  */
 
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 import { getConfig, getFAQs } from '@/lib/airtable';
 import { getCorsHeaders } from '@/lib/cors';
@@ -12,6 +15,17 @@ import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+function getLocalConfigFallback(): object | null {
+  const path = join(process.cwd(), 'config.local.json');
+  if (!existsSync(path)) return null;
+  try {
+    const raw = readFileSync(path, 'utf-8');
+    return JSON.parse(raw) as object;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,15 +48,16 @@ export async function GET(request: NextRequest) {
     const [config, faqs] = await Promise.all([getConfig(), getFAQs()]);
 
     const quickButtonsLimit = parseInt(config.quick_buttons_limit || '6', 10);
-    const categoryCounts = new Map<string, string>();
+    // For each category, use highest-priority FAQ's question
+    const categoryToFaq = new Map<string, { label: string; question: string }>();
     for (const faq of faqs) {
-      if (!categoryCounts.has(faq.category)) {
-        categoryCounts.set(faq.category, faq.category);
+      if (!categoryToFaq.has(faq.category)) {
+        categoryToFaq.set(faq.category, { label: faq.category, question: faq.question });
       }
     }
-    const categories = Array.from(categoryCounts.keys())
+    const categories = Array.from(categoryToFaq.entries())
       .slice(0, quickButtonsLimit)
-      .map((category) => ({ label: category, category }));
+      .map(([category, { label, question }]) => ({ label, category, question }));
 
     let theme: { primary_color?: string; font_family?: string } | undefined;
     if (config.theme) {
@@ -90,6 +105,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Config endpoint error', error);
+    const localConfig = getLocalConfigFallback();
+    if (localConfig && typeof localConfig === 'object' && 'brand_name' in localConfig) {
+      return NextResponse.json(localConfig, {
+        headers: { ...getCorsHeaders(request), 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+      });
+    }
     return NextResponse.json({ error: 'Something went wrong' }, {
       status: 500,
       headers: getCorsHeaders(request),

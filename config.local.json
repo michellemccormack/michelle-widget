@@ -1,0 +1,16 @@
+{
+  "brand_name": "Michelle McCormack",
+  "welcome_message": "Hi! I'm Michelle's AI assistant. Ask me about my work, services, or how Promptly works—anything.",
+  "quick_buttons": [
+    { "label": "About", "category": "About", "question": "Who are you?" },
+    { "label": "Services", "category": "Services", "question": "What services do you offer?" },
+    { "label": "AI Assistant", "category": "AI Assistant", "question": "What is Promptly?" },
+    { "label": "Portfolio", "category": "Portfolio", "question": "What's in your portfolio?" },
+    { "label": "Features", "category": "Features", "question": "What can the AI assistant do?" },
+    { "label": "Contact", "category": "Contact", "question": "How can I contact you?" }
+  ],
+  "theme": { "primary_color": "#DC143C" },
+  "fallback_message": "I'm not sure about that. Would you like to speak with someone?",
+  "contact_cta_label": "Contact Us",
+  "require_email_to_chat": false
+}

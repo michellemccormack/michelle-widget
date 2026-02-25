@@ -76,15 +76,18 @@ export async function generateFallbackResponse(
           content: `${MICHELLE_CONTEXT}
 
 INSTRUCTIONS:
+- ALWAYS write in first person (I, my, me) — never third person (she, her, they, Michelle's)
+- You ARE Michelle speaking directly to the visitor, not an assistant talking about her
 - You are a warm, friendly assistant representing Michelle - answer naturally and conversationally
-- Keep answers to 2-4 sentences - punchy, human, and genuine
+- Keep answers to 1-2 sentences maximum — under 200 characters
+- Never use exclamation points
 - For questions about Michelle: answer warmly based on her background and services above
 - For questions about the AI Agent Assistant: describe it as a product she builds for brands and campaigns
 - For completely off-topic questions: warmly redirect to Michelle's work
 - NEVER say "search results", "I don't have information", "please provide more context", or "I cannot find"
 - NEVER mention that you are an AI or that you are looking anything up
 - NEVER make up specific details not listed above
-- End with a natural conversational nudge when it fits ("Want to schedule a call?" or "Ready to learn more?")
+- NEVER end your response with a question — no 'Want to know more?', 'What else can I help with?', 'Would you like to discuss this further?' or any similar closing question
 - Do NOT include URLs in your response - the UI handles CTAs separately`,
         },
         {
@@ -92,11 +95,17 @@ INSTRUCTIONS:
           content: userQuestion,
         },
       ],
-      max_tokens: 200,
+      max_tokens: 100,
       temperature: 0.4,
     });
 
     const content = response.choices[0]?.message?.content?.trim();
+    // Enforce 200 char cap
+    if (content && content.length > 200) {
+      const cut = content.slice(0, 200);
+      const lastSpace = cut.lastIndexOf(' ');
+      return lastSpace > 80 ? cut.slice(0, lastSpace).trim() : cut.trim();
+    }
     return content || fallbackMessage;
   } catch (error) {
     logger.error('generateFallbackResponse failed', error);
@@ -112,7 +121,7 @@ export async function synthesizeAnswerFromFAQ(
   try {
     const completion = await openai.chat.completions.create({
       model: FALLBACK_MODEL,
-      max_tokens: 300,
+      max_tokens: 150,
       messages: [
         {
           role: 'system',
@@ -121,10 +130,12 @@ export async function synthesizeAnswerFromFAQ(
 Rules:
 - ALWAYS write in first person (I, my, we) — never third person (she, her, they)
 - Michelle is speaking directly to the visitor
-- Keep answers concise and direct — 2-4 sentences maximum
+- Keep answers concise and direct — 1-2 sentences maximum, under 200 characters
+- Never use exclamation points
 - Never start with filler phrases like "Great question!", "I understand", "Certainly!", or "Of course!"
 - Get straight to the answer
-- NEVER end your response with a question
+- If the FAQ answer starts with "Yes" or is clearly affirmative, always begin your response with "Yes."
+- NEVER end your response with a question — no 'Want to know more?', 'What else can I help with?', 'Would you like to discuss this further?' or any similar closing question
 - If the FAQ answer doesn't directly address the question, use it as context to give the most helpful response possible`,
         },
         {
@@ -134,7 +145,14 @@ Rules:
       ],
     });
 
-    return completion.choices[0]?.message?.content?.trim() || fallbackMessage;
+    const content = completion.choices[0]?.message?.content?.trim();
+    // Enforce 200 char cap
+    if (content && content.length > 200) {
+      const cut = content.slice(0, 200);
+      const lastSpace = cut.lastIndexOf(' ');
+      return lastSpace > 80 ? cut.slice(0, lastSpace).trim() : cut.trim();
+    }
+    return content || fallbackMessage;
   } catch (error) {
     logger.error('synthesizeAnswerFromFAQ failed', error);
     return fallbackMessage;
