@@ -514,15 +514,8 @@
 
 .ai-widget-pills-scroll {
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: 6px;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.ai-widget-pills-scroll::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  gap: 7px;
 }
 
 .ai-widget-pill {
